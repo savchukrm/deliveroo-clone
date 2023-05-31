@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState, useEffect } from 'react';
 import { useLayoutEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import {
@@ -18,14 +18,29 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Categories from '../components/Categories';
 import FeaturedRow from '../components/FeaturedRow';
+import sanityClient from '../sanity';
 
 const HomeScreen = () => {
+  const [featuredCategories, setFeaturedCategories] = useState([]);
+
   const navigation = useNavigation();
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: false,
     });
+  }, []);
+
+  useEffect(() => {
+    sanityClient
+      .fetch(`*[_type == "featured"] {..., restaurants[]->{..., dishes[]->}}`)
+      .then((data) => {
+        console.log('data:', data);
+        setFeaturedCategories(data);
+      })
+      .catch((err) => {
+        console.log('Err at Home Page:', err);
+      });
   }, []);
 
   return (
